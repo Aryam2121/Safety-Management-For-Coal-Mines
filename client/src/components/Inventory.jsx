@@ -5,6 +5,7 @@ import { Button, TextField, Tooltip, Table, TableBody, TableCell, TableContainer
 import SortIcon from '@mui/icons-material/Sort';
 import DownloadIcon from '@mui/icons-material/Download';
 import { CSVLink } from "react-csv";
+import { motion } from 'framer-motion';
 
 const Inventory = () => {
   const { resources } = useResources();
@@ -62,7 +63,12 @@ const Inventory = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded shadow-md">
+    <motion.div
+      className="p-6 bg-white rounded shadow-md"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <h2 className="text-2xl font-bold mb-4">Inventory Management</h2>
 
       {/* Search Bar */}
@@ -132,15 +138,19 @@ const Inventory = () => {
             </TableHead>
             <TableBody>
               {displayedResources.map((item) => (
-                <TableRow
+                <motion.TableRow
                   key={item.id}
                   hover
                   className={`${item.available < 10 ? 'bg-red-100' : ''}`}
                   onClick={() => handleOpenModal(item)}
+                  whileHover={{ scale: 1.05 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 >
                   <TableCell>{item.name}</TableCell>
                   <TableCell align="right">{item.available}</TableCell>
-                </TableRow>
+                </motion.TableRow>
               ))}
             </TableBody>
           </Table>
@@ -204,7 +214,7 @@ const Inventory = () => {
           </Button>
         </Box>
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 
