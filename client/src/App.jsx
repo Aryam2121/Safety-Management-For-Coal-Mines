@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ResourceProvider } from './context/ResourceContext';
 import { WeatherProvider } from './context/WeatherContext';
 import Layout from './components/Layout'; // Import the Layout component
+import WeatherTrivia from './components/weatherQuiz';
 
 // Lazy-loaded components
 const CoalMineCards = lazy(() => import('./components/CoalMineCards'));
@@ -24,6 +25,8 @@ const Signup = lazy(() => import('./pages/Signup'));
 const CreateCoalMines = lazy(() => import('./components/CoalMineCards'));
 const Attendance = lazy(() => import('./components/Attendance'));
 const Chatbot = lazy(() => import('./components/chatbot'));
+
+const Achievements = lazy(() => import('./components/Achievements'));
 function App() {
   return (
     <ResourceProvider>
@@ -33,6 +36,8 @@ function App() {
           <Layout>
             <Suspense fallback={<div>Loading...</div>}>
               <Routes>
+                <Route path='/achievements' element={<Achievements />} />
+                <Route path='/weatherQuiz' element={<WeatherTrivia />} />
                 <Route path="/chatbot" element={<Chatbot />} />
                 <Route path="/attendance" element={<Attendance />} />
                 <Route path="/coalMines" element={<CoalMineCards />} />

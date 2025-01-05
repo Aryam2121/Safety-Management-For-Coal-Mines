@@ -241,7 +241,9 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaFileUpload } from 'react-icons/fa';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'; // Speech Recognition
-import firebase from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
 import 'firebase/firestore';
 
 // Initialize Firebase
@@ -254,13 +256,11 @@ const firebaseConfig = {
   appId: 'your-app-id',
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-} else {
-  firebase.app();
-}
+// Initialize Firebase app
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const db = firebase.firestore();
+// Initialize Firestore
+const db = getFirestore(app);
 
 const ShiftHandoverLog = () => {
   const [logData, setLogData] = useState({
@@ -279,6 +279,7 @@ const ShiftHandoverLog = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const { transcript, resetTranscript } = useSpeechRecognition();
+  
   // Fetch previous shift logs on load
   useEffect(() => {
     const fetchShiftLogs = async () => {
@@ -325,12 +326,10 @@ const ShiftHandoverLog = () => {
       formData.append('file', file);
     }
 
-
     try {
       setLoading(true);
       const response = await axios.post('http://localhost:5000/api/createLogs', formData);
       const newLog = response.data;
-
       setPreviousLogs([...previousLogs, newLog]);
       resetForm();
       alert('Log submitted successfully!');
@@ -389,6 +388,7 @@ const ShiftHandoverLog = () => {
       setErrorMessage('Failed to update log. Please try again.');
     }
   };
+
   const startVoiceRecognition = () => {
     SpeechRecognition.startListening({ continuous: true });
   };
@@ -401,11 +401,11 @@ const ShiftHandoverLog = () => {
     }));
   };
 
-
   return (
     <div className="p-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Shift Handover Log</h2>
       <form onSubmit={submitLog} className="space-y-6">
+        {/* Shift Details */}
         <div>
           <label htmlFor="shiftDetails" className="text-lg font-medium text-gray-700">Shift Details</label>
           <textarea
@@ -419,6 +419,7 @@ const ShiftHandoverLog = () => {
           ></textarea>
         </div>
 
+        {/* Safety Issues */}
         <div>
           <label htmlFor="safetyIssues" className="text-lg font-medium text-gray-700">Safety Issues</label>
           <textarea
@@ -432,6 +433,7 @@ const ShiftHandoverLog = () => {
           ></textarea>
         </div>
 
+        {/* Next Shift Tasks */}
         <div>
           <label htmlFor="nextShiftTasks" className="text-lg font-medium text-gray-700">Next Shift Tasks</label>
           <textarea
@@ -445,6 +447,7 @@ const ShiftHandoverLog = () => {
           ></textarea>
         </div>
 
+        {/* Additional Notes */}
         <div>
           <label htmlFor="additionalNotes" className="text-lg font-medium text-gray-700">Additional Notes</label>
           <textarea
@@ -479,11 +482,12 @@ const ShiftHandoverLog = () => {
 
         {/* Error Message */}
         {errorMessage && <p className="text-red-600 mt-4 text-center">{errorMessage}</p>}
-{/* Voice Control */}
-<div className="mt-4 text-center">
-        <button onClick={startVoiceRecognition} className="bg-green-600 text-white p-2 rounded-lg">Start Voice</button>
-        <button onClick={stopVoiceRecognition} className="bg-red-600 text-white p-2 rounded-lg ml-2">Stop Voice</button>
-      </div>
+
+        {/* Voice Control */}
+        <div className="mt-4 text-center">
+          <button onClick={startVoiceRecognition} className="bg-green-600 text-white p-2 rounded-lg">Start Voice</button>
+          <button onClick={stopVoiceRecognition} className="bg-red-600 text-white p-2 rounded-lg ml-2">Stop Voice</button>
+        </div>
 
         {/* Upload Progress */}
         {uploading && (
@@ -505,17 +509,18 @@ const ShiftHandoverLog = () => {
               <p><strong>Shift Details:</strong> {log.shiftDetails}</p>
               <p><strong>Safety Issues:</strong> {log.safetyIssues}</p>
               <p><strong>Next Shift Tasks:</strong> {log.nextShiftTasks}</p> 
-              <button onClick={editLogId ? updateLog : submitLog}>
-          {editLogId ? 'Update Log' : 'Submit Log'}
-        </button>
-
-              <button
-                onClick={() => deleteLog(log._id)}
-                className="mt-2 text-red-600 hover:text-red-800"
-              >
-                Delete Log
-              </button>
-              <button onClick={() => editLog(log._id)}>Edit</button>
+              <div className="mt-2 flex space-x-2">
+                <button onClick={editLogId ? updateLog : submitLog} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                  {editLogId ? 'Update Log' : 'Submit Log'}
+                </button>
+                <button
+                  onClick={() => deleteLog(log._id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  Delete Log
+                </button>
+                <button onClick={() => editLog(log._id)} className="text-blue-600 hover:text-blue-800">Edit</button>
+              </div>
             </div>
           ))}
         </div>
